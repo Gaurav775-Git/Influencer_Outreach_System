@@ -1,0 +1,70 @@
+{
+  "passed": [
+    {
+      "name": "Demo Creator 1",
+      "handle": "demo_creator_1",
+      "platform": "YouTube",
+      "profile_url": "https://youtube.com/@demo_creator_1",
+      "follower_count": 10500,
+      "biography": "Fitness creator #1 sharing workout tips. contact1@example.com",
+      "niche": "fitness",
+      "source": "stub",
+      "filter_status": "PASS",
+      "filter_reasons": "",
+      "engagement_rate": null
+    },
+    {
+      "name": "Demo Creator 2",
+      "handle": "demo_creator_2",
+      "platform": "YouTube",
+      "profile_url": "https://youtube.com/@demo_creator_2",
+      "follower_count": 11000,
+      "biography": "Fitness creator #2 sharing workout tips. contact2@example.com",
+      "niche": "fitness",
+      "source": "stub",
+      "filter_status": "PASS",
+      "filter_reasons": "",
+      "engagement_rate": null
+    },
+    {
+      "name": "Demo Creator 3",
+      "handle": "demo_creator_3",
+      "platform": "YouTube",
+      "profile_url": "https://youtube.com/@demo_creator_3",
+      "follower_count": 11500,
+      "biography": "Fitness creator #3 sharing workout tips. contact3@example.com",
+      "niche": "fitness",
+      "source": "stub",
+      "filter_status": "PASS",
+      "filter_reasons": "",
+      "engagement_rate": null
+    },
+    {
+      "name": "Demo Creator 4",
+      "handle": "demo_creator_4",
+      "platform": "YouTube",
+      "profile_url": "https://youtube.com/@demo_creator_4",
+      "follower_count": 12000,
+      "biography": "Fitness creator #4 sharing workout tips. contact4@example.com",
+      "niche": "fitness",
+      "source": "stub",
+      "filter_status": "PASS",
+      "filter_reasons": "",
+      "engagement_rate": null
+    },
+    {
+      "name": "Demo Creator 5",
+      "handle": "demo_creator_5",
+      "platform": "YouTube",
+      "profile_url": "https://youtube.com/@demo_creator_5",
+      "follower_count": 12500,
+      "biography": "Fitness creator #5 sharing workout tips. contact5@example.com",
+      "niche": "fitness",
+      "source": "stub",
+      "filter_status": "PASS",
+      "filter_reasons": "",
+      "engagement_rate": null
+    }
+  ],
+  "failed": []
+}
