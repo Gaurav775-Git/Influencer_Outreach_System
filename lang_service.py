@@ -95,8 +95,8 @@ def generate_messages(name, platform, niche, themes) -> dict:
         }
 
 
-def process(input_file: str = "raw_influencers.xlsx"):
-    src = DATA / input_file
+def process(input_file: str = "filtered_influencers.xlsx"):
+    src = OUT / input_file
     if not src.exists():
         print(f"[ERROR] {src} not found")
         return
