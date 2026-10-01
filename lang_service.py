@@ -14,15 +14,13 @@ load_dotenv()
 DATA = Path("data");   DATA.mkdir(exist_ok=True)
 OUT  = Path("output"); OUT.mkdir(exist_ok=True)
 
-MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
-TIMEOUT = int(os.getenv("LLM_TIMEOUT", "30"))
-MAX_RETRIES = int(os.getenv("LLM_RETRIES", "2"))
+MODEL = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 
 llm = ChatOpenRouter(
     model=MODEL,
     temperature=0.7,
-    timeout=TIMEOUT,
-    max_retries=MAX_RETRIES,
+    timeout=60000,
+    max_retries=1,
 )
 
 BRAND = {
@@ -44,14 +42,21 @@ prompt = ChatPromptTemplate.from_messages([
      "You generate influencer outreach content. For each creator return JSON with:\n"
      "- themes: 3-5 short content-theme tags\n"
      "- email_pitch: 60-90 word warm email, no emojis, mentions niche + themes + audience fit + one collab angle\n"
-     "- instagram_dm: 15-30 word DM, natural, max 1 emoji\n"
+     "- instagram_dm: 15-30 word DM, natural, max 1 emoji\n\n"
+     "PERSONALIZATION RULES:\n"
+     "- If Recent Content contains specific video titles, reference ONE of them naturally "
+     "in the opening line of the email and the DM.\n"
+     "- Do NOT use generic phrases like 'loved your fitness content' or 'love your content'.\n"
+     "- The opening line must quote or clearly paraphrase the actual video title.\n"
+     "- Only fall back to generic niche language if Recent Content is 'Not Available'.\n\n"
      "Return only valid JSON matching the schema."),
     ("human",
      "Brand: {brand}\n"
      "Creator: {name}\n"
      "Platform: {platform}\n"
      "Niche: {niche}\n"
-     "Bio: {bio}"),
+     "Bio: {bio}\n"
+     "Recent Content: {recent_titles}"),
 ])
 
 
@@ -70,6 +75,7 @@ def process_one(row: dict) -> dict:
     bio = str(row.get("biography", "")).strip()
     niche = str(row.get("niche", "")).strip() or "general"
     platform = str(row.get("platform", "")).strip()
+    recent = str(row.get("recent_titles", "")).strip() or "Not Available"
 
     if not name:
         return _fallback("missing name")
@@ -82,6 +88,7 @@ def process_one(row: dict) -> dict:
             "platform": platform,
             "niche": niche,
             "bio": bio[:800] if bio else "(no bio)",
+            "recent_titles": recent,
         })
         email = out.email_pitch.strip()
         dm = out.instagram_dm.strip()
@@ -108,7 +115,7 @@ def process(input_file: str = "filtered_influencers.xlsx"):
     df = pd.read_excel(src)
     total = len(df)
     print(f"[INFO] loaded {total} rows from {src}")
-    print(f"[INFO] model={MODEL}  timeout={TIMEOUT}s  retries={MAX_RETRIES}")
+    print(f"[INFO] model={MODEL}  timeout=60s  retries=1")
 
     results = []
     start = time.time()

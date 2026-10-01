@@ -47,13 +47,30 @@ def search_channel_ids(youtube, keyword, max_results=50):
     try:
         resp = youtube.search().list(
             q=keyword, part="snippet", type="channel",
-            maxResults=min(max_results, 50)
+            maxResults=min(max_results, 10)
         ).execute()
         for item in resp.get("items", []):
             ids.append(item["snippet"]["channelId"])
     except Exception as e:
         print(f"    search failed '{keyword}': {e}")
     return ids
+
+
+def get_recent_titles(youtube, uploads_playlist_id, max_titles=2):
+    titles = []
+    try:
+        resp = youtube.playlistItems().list(
+            playlistId=uploads_playlist_id,
+            part="snippet",
+            maxResults=max_titles
+        ).execute()
+        for item in resp.get("items", []):
+            title = item["snippet"].get("title", "").strip()
+            if title:
+                titles.append(title)
+    except Exception as e:
+        print(f"    recent titles failed: {e}")
+    return titles
 
 
 def fetch_channel_stats(youtube, channel_ids):
@@ -63,7 +80,7 @@ def fetch_channel_stats(youtube, channel_ids):
         try:
             resp = youtube.channels().list(
                 id=",".join(batch),
-                part="snippet,statistics,brandingSettings"
+                part="snippet,statistics,brandingSettings,contentDetails"
             ).execute()
             for ch in resp.get("items", []):
                 stats = ch.get("statistics", {})
@@ -73,7 +90,15 @@ def fetch_channel_stats(youtube, channel_ids):
                 subs = int(subs)
                 if subs < MIN_FOLLOWERS or subs > MAX_FOLLOWERS:
                     continue
+
                 snip = ch["snippet"]
+                uploads = (ch.get("contentDetails", {})
+                             .get("relatedPlaylists", {})
+                             .get("uploads"))
+
+                recent = get_recent_titles(youtube, uploads, 2) if uploads else []
+                time.sleep(0.2)
+
                 out.append({
                     "name":           snip["title"],
                     "handle":         snip.get("customUrl", "").lstrip("@"),
@@ -85,6 +110,7 @@ def fetch_channel_stats(youtube, channel_ids):
                     "total_views":    int(stats.get("viewCount", 0)),
                     "biography":      snip.get("description", ""),
                     "country":        snip.get("country", "Not Available"),
+                    "recent_titles":  " | ".join(recent) if recent else "Not Available",
                     "source":         "youtube_api",
                 })
         except Exception as e:
@@ -99,7 +125,6 @@ def fetch(niche="fitness", target=50):
     youtube = _yt()
     keywords = NICHE_KEYWORDS.get(niche, [niche])
 
-    # over-fetch: aim for target*3 IDs, then filter
     candidate_ids = []
     seen = set()
 
@@ -125,7 +150,6 @@ def fetch(niche="fitness", target=50):
     df = pd.DataFrame(channels)
     df["niche"] = niche
 
-    # cap at target if you want exactly 50; comment out to keep all
     if len(df) > target:
         df = df.head(target)
 
